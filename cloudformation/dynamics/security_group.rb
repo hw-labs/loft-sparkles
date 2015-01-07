@@ -14,7 +14,7 @@ SparkleFormation.dynamic(:security_group) do |_name, _config={}|
       set!("#{_name}_ingress_#{rule}".to_sym) do
         type 'AWS::EC2::SecurityGroupIngress'
         properties do
-          group_id ref!("#{_name}_security_group".to_sym)
+          group_name ref!("#{_name}_security_group".to_sym)
           ip_protocol settings[:protocol]
           from_port settings[:port]
           to_port settings[:port]
