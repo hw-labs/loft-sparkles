@@ -2,8 +2,11 @@ SparkleFormation.dynamic(:ec2_node) do |_name, _config|
 
   dynamic!(:instance_common, :sparkle, _name)
 
+  ec2_instance = nil
+
   resources do
-    set!("#{_name}_ec2_node".to_sym) do
+
+    ec2_instance = set!("#{_name}_ec2_node".to_sym) do
       type 'AWS::EC2::Instance'
       properties do
         image_id ref!("#{_name}_image_id".to_sym)
@@ -30,13 +33,16 @@ SparkleFormation.dynamic(:ec2_node) do |_name, _config|
         )
       end
     end
+
   end
 
   outputs do
-    "#{_name}_ec2_node_address".to_sym do
-      description 'Public address of #{_name} node'
+    set!("#{_name}_ec2_node_address".to_sym) do
+      description "Public address of #{_name} node"
       value attr!("#{_name}_ec2_node".to_sym, 'PublicIp')
     end
   end
+
+  ec2_instance
 
 end
