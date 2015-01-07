@@ -1,14 +1,14 @@
 SparkleFormation.dynamic(:ec2_node) do |_name, _config|
 
-  dynamic!(:instance_common, :sparkle)
+  dynamic!(:instance_common, :sparkle, _name)
 
   resources do
-    "#{_name}_ec2_node".to_sym do
+    set!("#{_name}_ec2_node".to_sym) do
       type 'AWS::EC2::Instance'
       properties do
-        image_id ref!(:image_id)
-        instance_type ref!(:instance_type)
-        key_name ref!(:key_name)
+        image_id ref!("#{_name}_image_id".to_sym)
+        instance_type ref!("#{_name}_instance_type".to_sym)
+        key_name ref!("#{_name}_key_name".to_sym)
         user_data(
           base64!(
             join!(
@@ -20,7 +20,7 @@ SparkleFormation.dynamic(:ec2_node) do |_name, _config|
               ref!('AWS::Region'),
               ' -s ',
               ref!('AWS::StackName'),
-              " -r #{_process_key(:sparkle_ec2_node)} --access-key ",
+              " -r #{_process_key("#{_name}_ec2_node".to_sym)} --access-key ",
               ref!(:stack_iam_access_key),
               ' --secret-key ',
               attr!(:stack_iam_access_key, :secret_access_key),
