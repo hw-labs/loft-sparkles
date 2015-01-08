@@ -14,8 +14,11 @@ SparkleFormation.new(:modular).load(:base).overrides do
   )
 
   dynamic!(:ec2_node, :sparkle) do
-    properties.security_groups [ref!(:sparkle_security_group)]
-    registry!(:nginx)
+    properties do
+      security_groups [ref!(:sparkle_security_group)]
+      user_data registry!(:user_data_nginx, :sparkle_ec2_node)
+    end
+    registry!(:metadata_nginx)
   end
 
 end

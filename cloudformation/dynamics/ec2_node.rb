@@ -12,25 +12,9 @@ SparkleFormation.dynamic(:ec2_node) do |_name, _config|
         image_id ref!("#{_name}_image_id".to_sym)
         instance_type ref!("#{_name}_instance_type".to_sym)
         key_name ref!("#{_name}_key_name".to_sym)
-        user_data(
-          base64!(
-            join!(
-              "#!/bin/bash\n",
-              "yum -q -y install python-setuptools nginx\n",
-              "apt-get -q -y install python-setuptools nginx\n",
-              "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
-              '/usr/local/bin/cfn-init -v --region ',
-              ref!('AWS::Region'),
-              ' -s ',
-              ref!('AWS::StackName'),
-              " -r #{_process_key("#{_name}_ec2_node".to_sym)} --access-key ",
-              ref!(:stack_iam_access_key),
-              ' --secret-key ',
-              attr!(:stack_iam_access_key, :secret_access_key),
-              "\n"
-            )
-          )
-        )
+        if(_config[:user_data])
+          user_data registry!(_config[:user_data], _name)
+        end
       end
     end
 

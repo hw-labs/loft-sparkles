@@ -2,49 +2,46 @@ SparkleFormation.dynamic(:autoscaling) do |_name, _config|
 
   dynamic!(:instance_common, :sparkle, _name)
 
+  asg_resource = nil
+
+  parameters do
+    set!("#{_name}_asg_min_size") do
+      description 'Minimum size for ASG'
+      type 'Number'
+      default 1
+    end
+    set!("#{_name}_asg_max_size") do
+      description 'Maximum size for ASG'
+      type 'Number'
+      default 2
+    end
+  end
+
   resources do
 
-    "#{_name}_autoscaling_group".to_sym do
+    set!("#{_name}_autoscaling_group".to_sym) do
       type 'AWS::AutoScaling::AutoScalingGroup'
       properties do
-        availability_zones({ 'Fn::GetAZs' => '' })
-        launch_configuration_name "#{_name}_launch_configuration".to_sym
-        min_size _config[:min_size] || 1
-        max_size _config[:max_size] || 2
-        if _process_key(_config[:elb])
-          load_balancer_names [ _config[:elb] ]
-        end
+        availability_zones azs!
+        launch_configuration_name ref!("#{_name}_launch_configuration".to_sym)
+        min_size ref!("#{_name}_asg_min_size".to_sym)
+        max_size ref!("#{_name}_asg_max_size".to_sym)
       end
     end
 
-    "#{_name}_launch_configuration".to_sym do
+    set!("#{_name}_launch_configuration".to_sym) do
       type 'AWS::AutoScaling::LaunchConfiguration'
       properties do
         image_id ref!("#{_name}_image_id".to_sym)
         instance_type ref!("#{_name}_instance_type".to_sym)
         key_name ref!("#{_name}_key_name".to_sym)
-        user_data(
-          base64!(
-            join!(
-              "#!/bin/bash\n",
-              "yum -q -y install python-setuptools nginx\n",
-              "apt-get -q -y install python-setuptools nginx\n",
-              "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
-              '/usr/local/bin/cfn-init -v --region ',
-              ref!('AWS::Region'),
-              ' -s ',
-              ref!('AWS::StackName'),
-              " -r #{_process_key("#{_name}_ec2_node".to_sym)} --access-key ",
-              ref!(:stack_iam_access_key),
-              ' --secret-key ',
-              attr!(:stack_iam_access_key, :secret_access_key),
-              "\n"
-            )
-          )
-        )
+        if(_config[:user_data])
+          user_data registry!(_config[:user_data], _name)
+        end
       end
-      registry!(_config[:registry])
     end
 
   end
+
+  asg_resource
 end
