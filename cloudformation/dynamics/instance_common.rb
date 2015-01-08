@@ -13,7 +13,7 @@ SparkleFormation.dynamic(:instance_common) do |_name, _config|
       type 'String'
     end
 
-    set!("#{_name}_key_name") do
+    set!("#{_name}_key_name".to_sym) do
       default 'sparkle-key'
       description 'EC2 SSH key name'
       type 'String'
