@@ -1,0 +1,474 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "My Stack Description",
+  "Parameters": {
+    "Creator": {
+      "Default": "spox",
+      "Description": "Creator of stack",
+      "Type": "String"
+    },
+    "SparkleImageId": {
+      "Default": "ami-ad42009d",
+      "AllowedValues": [
+        "ami-ad42009d",
+        "ami-c7d092f7"
+      ],
+      "Description": "AMI Image ID",
+      "Type": "String"
+    },
+    "SparkleInstanceType": {
+      "Default": "m1.small",
+      "Description": "Size of instance",
+      "Type": "String"
+    },
+    "SparkleKeyName": {
+      "Default": "sparkle-key",
+      "Description": "EC2 SSH key name",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "StackIamUser": {
+      "Type": "AWS::IAM::User",
+      "Properties": {
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "stack_description_access",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "cloudformation:DescribeStackResource",
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "StackIamAccessKey": {
+      "Type": "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": {
+          "Ref": "StackIamUser"
+        },
+        "Status": "Active"
+      }
+    },
+    "SparkleSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Instance security group (SparkleFormation Example)"
+      }
+    },
+    "SparkleIngressSsh": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupName": {
+          "Ref": "SparkleSecurityGroup"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": 22,
+        "ToPort": 22,
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "SparkleIngressWeb": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupName": {
+          "Ref": "SparkleSecurityGroup"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": 80,
+        "ToPort": 80,
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "Sparkle0Ec2Node": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": {
+          "Ref": "Sparkle0ImageId"
+        },
+        "InstanceType": {
+          "Ref": "Sparkle0InstanceType"
+        },
+        "KeyName": {
+          "Ref": "Sparkle0KeyName"
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "yum -q -y install python-setuptools nginx\n",
+                "apt-get -q -y install python-setuptools nginx\n",
+                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                "/usr/local/bin/cfn-init -v --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " -s ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " -r Sparkle0Ec2Node --access-key ",
+                {
+                  "Ref": "StackIamAccessKey"
+                },
+                " --secret-key ",
+                {
+                  "Fn::GetAtt": [
+                    "StackIamAccessKey",
+                    "SecretAccessKey"
+                  ]
+                },
+                "\n"
+              ]
+            ]
+          }
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "SparkleSecurityGroup"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "services": {
+              "sysvinit": {
+                "nginx": {
+                  "enabled": true,
+                  "ensureRunning": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Sparkle1Ec2Node": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": {
+          "Ref": "Sparkle1ImageId"
+        },
+        "InstanceType": {
+          "Ref": "Sparkle1InstanceType"
+        },
+        "KeyName": {
+          "Ref": "Sparkle1KeyName"
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "yum -q -y install python-setuptools nginx\n",
+                "apt-get -q -y install python-setuptools nginx\n",
+                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                "/usr/local/bin/cfn-init -v --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " -s ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " -r Sparkle1Ec2Node --access-key ",
+                {
+                  "Ref": "StackIamAccessKey"
+                },
+                " --secret-key ",
+                {
+                  "Fn::GetAtt": [
+                    "StackIamAccessKey",
+                    "SecretAccessKey"
+                  ]
+                },
+                "\n"
+              ]
+            ]
+          }
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "SparkleSecurityGroup"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "services": {
+              "sysvinit": {
+                "nginx": {
+                  "enabled": true,
+                  "ensureRunning": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Sparkle2Ec2Node": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": {
+          "Ref": "Sparkle2ImageId"
+        },
+        "InstanceType": {
+          "Ref": "Sparkle2InstanceType"
+        },
+        "KeyName": {
+          "Ref": "Sparkle2KeyName"
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "yum -q -y install python-setuptools nginx\n",
+                "apt-get -q -y install python-setuptools nginx\n",
+                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                "/usr/local/bin/cfn-init -v --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " -s ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " -r Sparkle2Ec2Node --access-key ",
+                {
+                  "Ref": "StackIamAccessKey"
+                },
+                " --secret-key ",
+                {
+                  "Fn::GetAtt": [
+                    "StackIamAccessKey",
+                    "SecretAccessKey"
+                  ]
+                },
+                "\n"
+              ]
+            ]
+          }
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "SparkleSecurityGroup"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "services": {
+              "sysvinit": {
+                "nginx": {
+                  "enabled": true,
+                  "ensureRunning": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Sparkle3Ec2Node": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": {
+          "Ref": "Sparkle3ImageId"
+        },
+        "InstanceType": {
+          "Ref": "Sparkle3InstanceType"
+        },
+        "KeyName": {
+          "Ref": "Sparkle3KeyName"
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "yum -q -y install python-setuptools nginx\n",
+                "apt-get -q -y install python-setuptools nginx\n",
+                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                "/usr/local/bin/cfn-init -v --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " -s ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " -r Sparkle3Ec2Node --access-key ",
+                {
+                  "Ref": "StackIamAccessKey"
+                },
+                " --secret-key ",
+                {
+                  "Fn::GetAtt": [
+                    "StackIamAccessKey",
+                    "SecretAccessKey"
+                  ]
+                },
+                "\n"
+              ]
+            ]
+          }
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "SparkleSecurityGroup"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "services": {
+              "sysvinit": {
+                "nginx": {
+                  "enabled": true,
+                  "ensureRunning": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Sparkle4Ec2Node": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": {
+          "Ref": "Sparkle4ImageId"
+        },
+        "InstanceType": {
+          "Ref": "Sparkle4InstanceType"
+        },
+        "KeyName": {
+          "Ref": "Sparkle4KeyName"
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "yum -q -y install python-setuptools nginx\n",
+                "apt-get -q -y install python-setuptools nginx\n",
+                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                "/usr/local/bin/cfn-init -v --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " -s ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " -r Sparkle4Ec2Node --access-key ",
+                {
+                  "Ref": "StackIamAccessKey"
+                },
+                " --secret-key ",
+                {
+                  "Fn::GetAtt": [
+                    "StackIamAccessKey",
+                    "SecretAccessKey"
+                  ]
+                },
+                "\n"
+              ]
+            ]
+          }
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "SparkleSecurityGroup"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "services": {
+              "sysvinit": {
+                "nginx": {
+                  "enabled": true,
+                  "ensureRunning": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "StackCreator": {
+      "Description": "Stack creator",
+      "Value": {
+        "Ref": "Creator"
+      }
+    },
+    "Sparkle0Ec2NodeAddress": {
+      "Description": "Public address of sparkle0 node",
+      "Value": {
+        "Fn::GetAtt": [
+          "Sparkle0Ec2Node",
+          "PublicIp"
+        ]
+      }
+    },
+    "Sparkle1Ec2NodeAddress": {
+      "Description": "Public address of sparkle1 node",
+      "Value": {
+        "Fn::GetAtt": [
+          "Sparkle1Ec2Node",
+          "PublicIp"
+        ]
+      }
+    },
+    "Sparkle2Ec2NodeAddress": {
+      "Description": "Public address of sparkle2 node",
+      "Value": {
+        "Fn::GetAtt": [
+          "Sparkle2Ec2Node",
+          "PublicIp"
+        ]
+      }
+    },
+    "Sparkle3Ec2NodeAddress": {
+      "Description": "Public address of sparkle3 node",
+      "Value": {
+        "Fn::GetAtt": [
+          "Sparkle3Ec2Node",
+          "PublicIp"
+        ]
+      }
+    },
+    "Sparkle4Ec2NodeAddress": {
+      "Description": "Public address of sparkle4 node",
+      "Value": {
+        "Fn::GetAtt": [
+          "Sparkle4Ec2Node",
+          "PublicIp"
+        ]
+      }
+    }
+  }
+}
