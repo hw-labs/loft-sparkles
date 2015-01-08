@@ -1,6 +1,6 @@
 SparkleFormation.dynamic(:ec2_node) do |_name, _config={}|
 
-  dynamic!(:instance_common, :sparkle, _name)
+  dynamic!(:instance_common, :sparkle)
 
   ec2_instance = nil
 
