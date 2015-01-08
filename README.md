@@ -58,11 +58,37 @@ $> bundle exec knife cloudformation create my-sfn-stack --file cloudformation/te
 ### View stack events
 
 ```
-$> bundle exec knife cloudformation events my-sfn-stack --poll
+$> bundle exec knife cloudformation events my-stack --poll
+```
+
+### View stack resources and outputs
+
+```
+$> bundle exec knife cloudformation describe my-stack
+```
+
+### Inspect the stack
+
+Stack data:
+
+```
+$> bundle exec knife cloudformation inspect my-stack
+```
+
+Template:
+
+```
+$> bundle exec knife cloudformation inspect my-stack -a template
+```
+
+EC2 instance addresses within stack:
+
+```
+$> bundle exec knife cloudformation inspect my-stack -N
 ```
 
 ### Delete stack
 
 ```
-$> bundle exec knife cloudformation destroy my-sfn-stack
+$> bundle exec knife cloudformation destroy my-stack
 ```
