@@ -22,4 +22,7 @@ SparkleFormation.new(:modular).load(:base).overrides do
     properties.security_groups [ref!(:sparkle_security_group)]
   end
 
+  parameters.sparkle_asg_min_size.default 5
+  parameters.sparkle_asg_max_size.default 5
+
 end
