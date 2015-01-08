@@ -1,4 +1,4 @@
-SparkleFormation.dynamic(:ec2_node) do |_name, _config|
+SparkleFormation.dynamic(:ec2_node) do |_name, _config={}|
 
   dynamic!(:instance_common, :sparkle, _name)
 
@@ -13,7 +13,7 @@ SparkleFormation.dynamic(:ec2_node) do |_name, _config|
         instance_type ref!("#{_name}_instance_type".to_sym)
         key_name ref!("#{_name}_key_name".to_sym)
         if(_config[:user_data])
-          user_data registry!(_config[:user_data], _name)
+          user_data registry!(_config[:user_data], "#{_name}_ec2_node".to_sym)
         end
       end
     end
