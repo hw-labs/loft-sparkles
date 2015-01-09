@@ -18,8 +18,11 @@ SparkleFormation.dynamic(:security_group) do |_name, _config={}|
           ip_protocol settings[:protocol]
           from_port settings[:port]
           to_port settings[:port]
-          if settings[:source_security_group]
+          if(settings[:source_security_group])
             source_security_group settings[:source_security_group]
+            if(settings[:source_security_group_id])
+              source_security_group_id settings[:source_security_group_id]
+            end
           else
             cidr_ip settings[:cidr] || '0.0.0.0/0'
           end
