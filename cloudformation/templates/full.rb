@@ -94,6 +94,7 @@ SparkleFormation.new(:full) do
             join!(
               "#!/bin/bash\n",
               "yum -q -y install python-setuptools nginx\n",
+              "apt-get update\n",
               "apt-get -q -y install python-setuptools nginx\n",
               "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
               '/usr/local/bin/cfn-init -v --region ',
